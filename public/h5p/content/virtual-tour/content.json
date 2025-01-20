@@ -1,0 +1,124 @@
+{
+  "title": "Virtual Map Tour",
+  "language": "en",
+  "mainLibrary": "H5P.ThreeImage",
+  "embedTypes": ["div"],
+  "license": "U",
+  "contentType": "Interactive Virtual Tour",
+  "scenes": {
+    "startScene": "entrance",
+    "scenes": {
+      "entrance": {
+        "sceneId": "entrance",
+        "sceneName": "Campus Entrance",
+        "scenetype": "360",
+        "image": "images/Sonivale Campus Hallway 360.png",
+        "yaw": 0,
+        "pitch": 0,
+        "hfov": 100,
+        "minHfov": 50,
+        "maxHfov": 120,
+        "hotspots": [
+          {
+            "type": "scene",
+            "text": "Enter Library",
+            "sceneId": "library",
+            "position": {
+              "x": 3000,
+              "y": 0,
+              "z": -3000
+            }
+          },
+          {
+            "type": "scene",
+            "text": "Enter Clinical Lab",
+            "sceneId": "lab1",
+            "position": {
+              "x": -3000,
+              "y": 0,
+              "z": 3000
+            }
+          },
+          {
+            "type": "info",
+            "text": "Information Board",
+            "title": "Campus Updates",
+            "description": "Check out our latest campus events and announcements",
+            "position": {
+              "x": 0,
+              "y": 1000,
+              "z": -4000
+            }
+          }
+        ]
+      },
+      "library": {
+        "sceneId": "library",
+        "sceneName": "Library",
+        "scenetype": "360",
+        "image": "images/Sonivale Library 360.png",
+        "yaw": 0,
+        "pitch": 0,
+        "hfov": 100,
+        "hotspots": [
+          {
+            "type": "scene",
+            "text": "Return to Entrance",
+            "sceneId": "entrance",
+            "position": {
+              "x": -4000,
+              "y": 0,
+              "z": 0
+            }
+          }
+        ]
+      },
+      "lab1": {
+        "sceneId": "lab1",
+        "sceneName": "Clinical Lab - Station 1",
+        "scenetype": "360",
+        "image": "images/clinical lab 360/Lab 1.jpg",
+        "yaw": 0,
+        "pitch": 0,
+        "hfov": 100,
+        "hotspots": [
+          {
+            "type": "scene",
+            "text": "Return to Entrance",
+            "sceneId": "entrance",
+            "position": {
+              "x": -4000,
+              "y": 0,
+              "z": 0
+            }
+          },
+          {
+            "type": "scene",
+            "text": "Next Station",
+            "sceneId": "lab2",
+            "position": {
+              "x": 4000,
+              "y": 0,
+              "z": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  "behaviour": {
+    "showBackButton": true,
+    "showHomeButton": true,
+    "showNavigationBar": true,
+    "showFullscreenButton": true,
+    "autoplay": false
+  },
+  "l10n": {
+    "startScreenButtonText": "Start Tour",
+    "backButtonText": "Back",
+    "homeButtonText": "Home",
+    "fullscreenButtonText": "Fullscreen",
+    "nextSceneText": "Next Scene",
+    "previousSceneText": "Previous Scene"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Virtual Campus Tour",
+  "language": "en",
+  "mainLibrary": "H5P.ThreeImage",
+  "preloadedDependencies": [
+    {
+      "machineName": "H5P.ThreeImage",
+      "majorVersion": "0",
+      "minorVersion": "5"
+    },
+    {
+      "machineName": "H5P.ThreeJS",
+      "majorVersion": "1",
+      "minorVersion": "0"
+    }
+  ],
+  "embedTypes": ["div"],
+  "author": "Your Institution",
+  "license": "U",
+  "metaKeywords": ["virtual tour", "campus", "360"],
+  "metaDescription": "An interactive virtual tour of our campus facilities"
+}

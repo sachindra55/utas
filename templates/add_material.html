@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Add Course Material{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Add Material to {{ course.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                            {% if form.title.errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.title.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows="5") }}
+                            {% if form.description.errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.description.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.material_type.label(class="form-label") }}
+                            {{ form.material_type(class="form-select") }}
+                            {% if form.material_type.errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.material_type.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.file.label(class="form-label") }}
+                            {{ form.file(class="form-control") }}
+                            {% if form.file.errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.file.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Existing Materials -->
+            {% if course.materials %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Existing Materials</h3>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for material in course.materials|sort(attribute='created_at', reverse=true) %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ material.title }}</h5>
+                                <small class="text-muted">{{ material.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <p class="mb-1">{{ material.description }}</p>
+                            <div class="mt-2">
+                                <span class="badge bg-info">{{ material.material_type }}</span>
+                                <a href="{{ url_for('download_file', filename=material.file_path) }}" class="btn btn-outline-primary btn-sm">
+                                    Download Material
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

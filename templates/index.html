@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-md-8">
+            <h1 class="display-4 mb-4">Welcome to Learning Platform</h1>
+            <p class="lead">A comprehensive platform for students and staff to manage courses and learning materials.</p>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        <div class="col">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">For Students</h5>
+                    <p class="card-text">Access course materials, submit assignments, and track your progress.</p>
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">Register as Student</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">For Staff</h5>
+                    <p class="card-text">Create courses, manage assignments, and interact with students.</p>
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">Register as Staff</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Browse Courses</h5>
+                    <p class="card-text">Explore our wide range of available courses.</p>
+                    <a href="{{ url_for('courses') }}" class="btn btn-primary">View Courses</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h4 class="alert-heading">Quick Links</h4>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><a href="{{ url_for('courses') }}" class="alert-link">View All Courses</a></p>
+                        {% if current_user.role == 'staff' %}
+                        <p><a href="{{ url_for('create_course') }}" class="alert-link">Create New Course</a></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

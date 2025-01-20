@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>H5P Test</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #h5p-container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="h5p-container"></div>
+
+    <script>
+        // Initialize H5P namespace
+        window.H5P = window.H5P || {};
+
+        // Add EventDispatcher
+        H5P.EventDispatcher = function () {
+            this.on = function () {};
+            this.trigger = function () {};
+        };
+
+        // Extend ThreeImage with EventDispatcher
+        H5P.ThreeImage = function (params, container) {
+            H5P.EventDispatcher.call(this);
+            
+            // Initialize the scene
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Load the panorama texture
+            if (params && params.scenes && params.scenes[0]) {
+                const scene0 = params.scenes[0];
+                if (scene0.scenesrc && scene0.scenesrc.path) {
+                    const textureLoader = new THREE.TextureLoader();
+                    textureLoader.load(
+                        '/h5p/content/' + scene0.scenesrc.path,
+                        function(texture) {
+                            const geometry = new THREE.SphereGeometry(500, 60, 40);
+                            geometry.scale(-1, 1, 1);
+                            const material = new THREE.MeshBasicMaterial({ map: texture });
+                            const sphere = new THREE.Mesh(geometry, material);
+                            scene.add(sphere);
+                            
+                            // Set camera position
+                            camera.position.set(0, 0, 0);
+                            
+                            // Animation loop
+                            function animate() {
+                                requestAnimationFrame(animate);
+                                renderer.render(scene, camera);
+                            }
+                            animate();
+                        },
+                        undefined,
+                        function(err) {
+                            console.error('Error loading texture:', err);
+                        }
+                    );
+                }
+            }
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        };
+
+        H5P.ThreeImage.prototype = Object.create(H5P.EventDispatcher.prototype);
+        H5P.ThreeImage.prototype.constructor = H5P.ThreeImage;
+        
+        // Load Three.js first
+        const threeScript = document.createElement('script');
+        threeScript.src = '/h5p/H5P.ThreeJS-1.0/dist/three.min.js';
+        threeScript.onload = () => {
+            console.log('Three.js loaded');
+            initContent();
+        };
+        document.head.appendChild(threeScript);
+
+        function initContent() {
+            fetch('/h5p/content/content.json')
+                .then(response => response.json())
+                .then(content => {
+                    console.log('Content:', content);
+                    if (content.threeImage) {
+                        const container = document.getElementById('h5p-container');
+                        try {
+                            new H5P.ThreeImage(content.threeImage, container);
+                            console.log('H5P content initialized');
+                        } catch (error) {
+                            console.error('Error initializing H5P content:', error);
+                        }
+                    }
+                })
+                .catch(error => console.error('Error loading content:', error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Welcome, {{ current_user.first_name }}!</h2>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('create_course') }}" class="btn btn-primary">Create New Course</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Teaching Courses -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">My Courses</h3>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                    <div class="list-group">
+                        {% for course in courses %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ course.title }}</h5>
+                                <small class="text-muted">{{ course.enrolled_students|length }} students</small>
+                            </div>
+                            <p class="mb-1">{{ course.description[:100] }}...</p>
+                            <div class="mt-2">
+                                <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">View Course</a>
+                                <a href="{{ url_for('add_material', course_id=course.id) }}" class="btn btn-sm btn-outline-primary">Add Material</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">You are not teaching any courses yet.</p>
+                    <a href="{{ url_for('create_course') }}" class="btn btn-primary">Create Course</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-md-4">
+            <!-- Recent Submissions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Recent Submissions</h3>
+                </div>
+                <div class="card-body">
+                    {% set recent_submissions = [] %}
+                    {% for course in courses %}
+                        {% for assignment in course.assignments %}
+                            {% for submission in assignment.submissions %}
+                                {% if submission.status == 'submitted' %}
+                                    {% set _ = recent_submissions.append(submission) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+
+                    {% if recent_submissions %}
+                    <div class="list-group">
+                        {% for submission in recent_submissions[:5]|sort(attribute='submitted_at', reverse=True) %}
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ submission.assignment.title }}</h6>
+                            <p class="mb-1">
+                                Student: {{ submission.student.first_name }} {{ submission.student.last_name }}
+                                <br>
+                                Course: {{ submission.assignment.course.title }}
+                            </p>
+                            <small class="text-muted">Submitted: {{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-primary" onclick="gradeSubmission({{ submission.id }})">Grade</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No pending submissions to grade.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Course Statistics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Course Statistics</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Total Courses
+                            <span class="badge bg-primary rounded-pill">{{ courses|length }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Total Students
+                            {% set total_students = 0 %}
+                            {% for course in courses %}
+                                {% set total_students = total_students + course.enrolled_students|length %}
+                            {% endfor %}
+                            <span class="badge bg-primary rounded-pill">{{ total_students }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Pending Grades
+                            <span class="badge bg-warning rounded-pill">{{ recent_submissions|length }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grade Submission Modal -->
+<div class="modal fade" id="gradeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Grade Submission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="gradeForm">
+                    <input type="hidden" id="submissionId">
+                    <div class="mb-3">
+                        <label for="grade" class="form-label">Grade</label>
+                        <input type="number" class="form-control" id="grade" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="feedback" class="form-label">Feedback</label>
+                        <textarea class="form-control" id="feedback" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Grade</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+function gradeSubmission(submissionId) {
+    document.getElementById('submissionId').value = submissionId;
+    new bootstrap.Modal(document.getElementById('gradeModal')).show();
+}
+
+document.getElementById('gradeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const submissionId = document.getElementById('submissionId').value;
+    const grade = document.getElementById('grade').value;
+    const feedback = document.getElementById('feedback').value;
+
+    try {
+        const response = await fetch(`/submission/${submissionId}/grade`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ grade, feedback })
+        });
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error grading submission');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error grading submission');
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

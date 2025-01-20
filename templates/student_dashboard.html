@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Welcome, {{ current_user.first_name }}!</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Enrolled Courses -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">My Courses</h3>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                    <div class="list-group">
+                        {% for course in courses %}
+                        <a href="{{ url_for('course_detail', course_id=course.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ course.title }}</h5>
+                                <small class="text-muted">{{ course.instructor.first_name }} {{ course.instructor.last_name }}</small>
+                            </div>
+                            <p class="mb-1">{{ course.description[:100] }}...</p>
+                            <small>{{ course.assignments|length }} assignments</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">You are not enrolled in any courses yet.</p>
+                    <a href="{{ url_for('courses') }}" class="btn btn-primary">Browse Courses</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Recent Submissions</h3>
+                </div>
+                <div class="card-body">
+                    {% if submissions %}
+                    <div class="list-group">
+                        {% for submission in submissions[:5] %}
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ submission.assignment.title }}</h6>
+                            <p class="mb-1">
+                                Status: 
+                                {% if submission.status == 'graded' %}
+                                <span class="badge bg-success">Graded ({{ submission.grade }}/{{ submission.assignment.total_points }})</span>
+                                {% else %}
+                                <span class="badge bg-warning">Submitted</span>
+                                {% endif %}
+                            </p>
+                            <small class="text-muted">Submitted: {{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No recent submissions.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Upcoming Assignments -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Upcoming Assignments</h3>
+                </div>
+                <div class="card-body">
+                    {% set upcoming = [] %}
+                    {% for course in courses %}
+                        {% for assignment in course.assignments %}
+                            {% if assignment.due_date and assignment.due_date > now %}
+                                {% set _ = upcoming.append(assignment) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+
+                    {% if upcoming %}
+                    <div class="list-group">
+                        {% for assignment in upcoming|sort(attribute='due_date') %}
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ assignment.title }}</h6>
+                            <p class="mb-1">{{ assignment.course.title }}</p>
+                            <small class="text-muted">Due: {{ assignment.due_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No upcoming assignments.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
